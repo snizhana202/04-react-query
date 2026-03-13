@@ -4,10 +4,7 @@ import type { MoviesResponse } from "../types/movie";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3/search/movie";
 
-export const fetchMovies = async (
-  query: string,
-  page: number = 1
-): Promise<MoviesResponse> => {
+export const fetchMovies = async (query: string, page: number): Promise<MoviesResponse> => {
   const { data } = await axios.get<MoviesResponse>(BASE_URL, {
     params: {
       api_key: API_KEY,
@@ -17,4 +14,3 @@ export const fetchMovies = async (
   });
   return data;
 };
-
