@@ -10,6 +10,7 @@ export default function MovieGrid({ movies, onSelect }: MovieGridProps) {
   if (movies.length === 0) return null;
 
   return (
+    
     <ul className={styles.grid}>
       {movies.map((movie) => (
         <li key={movie.id}>
