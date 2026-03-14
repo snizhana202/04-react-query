@@ -7,7 +7,7 @@ import ErrorMessage from "../ErrorMessage/ErrorMessage";
 import MovieModal from "../MovieModal/MovieModal";
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import ReactPaginate from "react-paginate";
 import css from "./App.module.css";
 import type { MoviesResponse } from "../../types/movie";
@@ -17,10 +17,10 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-const { data, isLoading, isError } = useQuery<MoviesResponse, Error>({
+  const { data, isLoading, isError } = useQuery<MoviesResponse, Error>({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
     enabled: !!query,
   });
 
@@ -34,12 +34,18 @@ const { data, isLoading, isError } = useQuery<MoviesResponse, Error>({
       <SearchBar onSubmit={handleSearch} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {!isLoading && !isError && data?.results.length === 0 && query && (
-        toast.error("No movies found for your request.")
-      )}
-      {!isLoading && !isError && data?.results.length > 0 && (
-        <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
-      )}
+      {!isLoading &&
+        !isError &&
+        data?.results.length === 0 &&
+        query &&
+        toast.error("No movies found for your request.")}
+      {!isLoading &&
+        !isError &&
+        Array.isArray(data?.results) &&
+        data.results.length > 0 && (
+          <MovieGrid movies={data.results} onSelect={setSelectedMovie} />
+        )}
+
       {selectedMovie && (
         <MovieModal
           movie={selectedMovie}
@@ -51,9 +57,7 @@ const { data, isLoading, isError } = useQuery<MoviesResponse, Error>({
           pageCount={data.total_pages}
           pageRangeDisplayed={5}
           marginPagesDisplayed={1}
-          onPageChange={(selectedItem: { selected: number }) =>
-            setPage(selectedItem.selected + 1)
-          }
+          onPageChange={({ selected }) => setPage(selected + 1)}
           forcePage={page - 1}
           containerClassName={css.pagination}
           activeClassName={css.active}
